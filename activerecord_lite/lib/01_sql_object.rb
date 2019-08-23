@@ -1,5 +1,7 @@
 require_relative 'db_connection'
+require_relative "relation.rb"
 require 'active_support/inflector'
+require 'byebug'
 # NB: the attr_accessor we wrote in phase 0 is NOT used in the rest
 # of this project. It was only a warm up.
 
@@ -36,13 +38,7 @@ class SQLObject
   end
 
   def self.all
-    results = DBConnection.execute(<<-SQL)
-      SELECT
-        *
-      FROM
-        #{table_name}
-    SQL
-    parse_all(results)
+    Relation.new(self.class_name)
   end
 
   def self.parse_all(results)
@@ -50,15 +46,7 @@ class SQLObject
   end
 
   def self.find(id)
-    results = DBConnection.execute(<<-SQL, id)
-      SELECT
-        *
-      FROM
-        #{table_name}
-      WHERE
-        id = ?
-    SQL
-    parse_all(results).first
+    Relation.new(self.class_name).where(id: id).first
   end
 
   def initialize(params = {})
